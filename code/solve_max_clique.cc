@@ -169,6 +169,7 @@ auto main(int argc, char * argv[]) -> int
             ("sdf",                                   "Smallest domain first (slow)")
             ("2df",                                   "Domains of size 2 first")
             ("prime",              po::value<int>(),  "Set initial incumbent size")
+            ("tau",                                   "Measure Kendall tau")
             ;
 
         po::options_description all_options{ "All options" };
@@ -214,6 +215,8 @@ auto main(int argc, char * argv[]) -> int
 
         if (options_vars.count("prime"))
             params.prime = options_vars["prime"].as<int>();
+
+        params.measure_kendall_tau = options_vars.count("tau");
 
         /* Create graphs */
         auto graph = read_dimacs(options_vars["file"].as<std::string>());

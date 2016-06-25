@@ -28,7 +28,7 @@ namespace
                     if (value.compare_exchange_strong(current_value, new_c_size)) {
                         std::unique_lock<std::mutex> lock(mutex);
                         c = new_c;
-                        std::cerr << "-- " << new_c.size() << std::endl;
+                        std::cout << "-- " << new_c.size() << std::endl;
                         break;
                     }
                 }
@@ -236,6 +236,41 @@ namespace
                 case Params::full_sort:
                     colour_class_order_sort(p, p_order, p_bounds);
                     break;
+            }
+
+            if (params.measure_kendall_tau) {
+                std::vector<unsigned> sizes;
+                unsigned count = 0;
+                for (unsigned i = 0 ; i < p.popcount() ; ++i) {
+                    ++count;
+                    if (i > 0 && p_bounds[i - 1] != p_bounds[i]) {
+                        sizes.push_back(count);
+                        count = 0;
+                    }
+                }
+                if (0 != count)
+                    sizes.push_back(count);
+
+                std::cerr << "a <- c(";
+                for (unsigned i = 0 ; i < sizes.size() ; ++i) {
+                    if (0 != i)
+                        std::cerr << ", ";
+                    std::cerr << sizes[i];
+                }
+                std::cerr << "); b <- c(";
+
+                sort(sizes.begin(), sizes.end(), [] (auto a, auto b) { return a > b; });
+
+                unsigned rank = p.popcount();
+                for (unsigned i = 0 ; i < sizes.size() ; ++i) {
+                    if (i > 0 && sizes[i - 1] != sizes[i])
+                        --rank;
+                    if (0 != i)
+                        std::cerr << ", ";
+                    std::cerr << rank;
+                }
+
+                std::cerr << "); invisible(cat(paste(" << p_bounds[p.popcount() - 1] << ", cor(a, b, method=\"kendall\"), \"\\n\")));" << std::endl;
             }
 
             // for each v in p... (v comes later)

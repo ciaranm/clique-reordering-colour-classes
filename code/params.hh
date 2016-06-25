@@ -20,6 +20,9 @@ struct Params
     /// Prime the incumbent?
     unsigned prime = 0;
 
+    /// Measure Kendall tau?
+    bool measure_kendall_tau = false;
+
 };
 
 #endif
