@@ -14,8 +14,12 @@ struct Params
     /// The start time of the algorithm.
     std::chrono::time_point<std::chrono::steady_clock> start_time;
 
-    /// Connected only?
-    bool connected = false;
+    /// How much sorting to do?
+    enum { no_sorting, defer1, full_sort } how_much_sorting = no_sorting;
+
+    /// Prime the incumbent?
+    unsigned prime = 0;
+
 };
 
 #endif

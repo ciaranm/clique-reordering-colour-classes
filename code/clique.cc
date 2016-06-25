@@ -113,6 +113,106 @@ namespace
             }
         }
 
+        auto colour_class_order_defer1(
+                const FixedBitSet<n_words_> & p,
+                std::array<unsigned, n_words_ * bits_per_word> & p_order,
+                std::array<unsigned, n_words_ * bits_per_word> & p_bounds) -> void
+        {
+            FixedBitSet<n_words_> p_left = p; // not coloured yet
+            unsigned colour = 0;        // current colour
+            unsigned i = 0;             // position in p_bounds
+
+            unsigned d = 0;             // number deferred
+            std::array<unsigned, n_words_ * bits_per_word> defer;
+
+            // while we've things left to colour
+            while (! p_left.empty()) {
+                // next colour
+                ++colour;
+                // things that can still be given this colour
+                FixedBitSet<n_words_> q = p_left;
+
+                // while we can still give something this colour
+                unsigned number_with_this_colour = 0;
+                while (! q.empty()) {
+                    // first thing we can colour
+                    int v = q.first_set_bit();
+                    p_left.unset(v);
+                    q.unset(v);
+
+                    // can't give anything adjacent to this the same colour
+                    graph.intersect_with_row_complement(v, q);
+
+                    // record in result
+                    p_bounds[i] = colour;
+                    p_order[i] = v;
+                    ++i;
+                    ++number_with_this_colour;
+                }
+
+                if (1 == number_with_this_colour) {
+                    --i;
+                    --colour;
+                    defer[d++] = p_order[i];
+                }
+            }
+
+            for (unsigned n = 0 ; n < d ; ++n) {
+                ++colour;
+                p_order[i] = defer[n];
+                p_bounds[i] = colour;
+                i++;
+            }
+        }
+
+        auto colour_class_order_sort(
+                const FixedBitSet<n_words_> & p,
+                std::array<unsigned, n_words_ * bits_per_word> & p_order,
+                std::array<unsigned, n_words_ * bits_per_word> & p_bounds) -> void
+        {
+            FixedBitSet<n_words_> p_left = p; // not coloured yet
+            std::vector<std::vector<unsigned> > colour_classes;
+
+            // while we've things left to colour
+            while (! p_left.empty()) {
+                // next colour
+                colour_classes.push_back({});
+
+                // things that can still be given this colour
+                FixedBitSet<n_words_> q = p_left;
+
+                // while we can still give something this colour
+                while (! q.empty()) {
+                    // first thing we can colour
+                    int v = q.first_set_bit();
+                    p_left.unset(v);
+                    q.unset(v);
+
+                    // can't give anything adjacent to this the same colour
+                    graph.intersect_with_row_complement(v, q);
+
+                    // record in result
+                    colour_classes.back().push_back(v);
+                }
+            }
+
+            std::stable_sort(colour_classes.begin(), colour_classes.end(), [] (const auto & a, const auto & b) {
+                    return a.size() > b.size();
+                    });
+
+            unsigned colour = 0;         // current colour
+            unsigned i = 0;              // position in p_bounds
+
+            for (auto & c : colour_classes) {
+                ++colour;
+                for (auto & v : c) {
+                    p_order[i] = v;
+                    p_bounds[i] = colour;
+                    ++i;
+                }
+            }
+        }
+
         auto expand(
                 std::vector<unsigned> & c,
                 FixedBitSet<n_words_> & p
@@ -124,7 +224,19 @@ namespace
             std::array<unsigned, n_words_ * bits_per_word> p_order;
             std::array<unsigned, n_words_ * bits_per_word> p_bounds;
 
-            colour_class_order(p, p_order, p_bounds);
+            switch (params.how_much_sorting) {
+                case Params::no_sorting:
+                    colour_class_order(p, p_order, p_bounds);
+                    break;
+
+                case Params::defer1:
+                    colour_class_order_defer1(p, p_order, p_bounds);
+                    break;
+
+                case Params::full_sort:
+                    colour_class_order_sort(p, p_order, p_bounds);
+                    break;
+            }
 
             // for each v in p... (v comes later)
             for (int n = p.popcount() - 1 ; n >= 0 ; --n) {
@@ -159,6 +271,8 @@ namespace
 
             FixedBitSet<n_words_> p;
             p.set_up_to(graph.size());
+
+            incumbent.value = params.prime;
 
             // go!
             expand(c, p);

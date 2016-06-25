@@ -166,6 +166,9 @@ auto main(int argc, char * argv[]) -> int
         display_options.add_options()
             ("help",                                  "Display help information")
             ("timeout",            po::value<int>(),  "Abort after this many seconds")
+            ("sdf",                                   "Smallest domain first (slow)")
+            ("2df",                                   "Domains of size 2 first")
+            ("prime",              po::value<int>(),  "Set initial incumbent size")
             ;
 
         po::options_description all_options{ "All options" };
@@ -204,12 +207,13 @@ auto main(int argc, char * argv[]) -> int
         /* Figure out what our options should be. */
         Params params;
 
-        params.connected = options_vars.count("connected");
+        if (options_vars.count("sdf"))
+            params.how_much_sorting = Params::full_sort;
+        else if (options_vars.count("2df"))
+            params.how_much_sorting = Params::defer1;
 
-        if (params.connected && ! options_vars.count("undirected")) {
-            std::cerr << "Currently --connected requires --undirected" << std::endl;
-            return EXIT_FAILURE;
-        }
+        if (options_vars.count("prime"))
+            params.prime = options_vars["prime"].as<int>();
 
         /* Create graphs */
         auto graph = read_dimacs(options_vars["file"].as<std::string>());
