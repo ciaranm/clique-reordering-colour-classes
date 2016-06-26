@@ -1,6 +1,6 @@
 BUILD_DIR := intermediate
 TARGET_DIR := ./
-SUBMAKEFILES := file.mk
+SUBMAKEFILES := file.mk create_random_graph.mk
 
 boost_ldlibs := -lboost_regex -lboost_thread -lboost_system -lboost_program_options
 

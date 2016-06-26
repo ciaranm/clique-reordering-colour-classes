@@ -1,3 +1,4 @@
 intermediate/
 solve_max_clique
+create_random_graph
 *.a
