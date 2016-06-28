@@ -11,7 +11,7 @@
 
 struct Graph
 {
-    unsigned size;
+    unsigned size = 0;
     std::vector<std::set<unsigned> > edges;
 };
 
