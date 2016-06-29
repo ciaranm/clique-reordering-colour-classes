@@ -23,6 +23,8 @@ struct Params
     /// Measure Kendall tau?
     bool measure_kendall_tau = false;
 
+    /// Shuffle before calculating tau?
+    bool shuffle_before_tau = false;
 };
 
 #endif

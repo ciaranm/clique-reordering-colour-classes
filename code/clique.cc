@@ -251,6 +251,9 @@ namespace
                 if (0 != count)
                     sizes.push_back(count);
 
+                if (params.shuffle_before_tau)
+                    random_shuffle(sizes.begin(), sizes.end());
+
                 std::cerr << "a <- c(";
                 for (unsigned i = 0 ; i < sizes.size() ; ++i) {
                     if (0 != i)

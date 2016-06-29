@@ -170,6 +170,7 @@ auto main(int argc, char * argv[]) -> int
             ("2df",                                   "Domains of size 2 first")
             ("prime",              po::value<int>(),  "Set initial incumbent size")
             ("tau",                                   "Measure Kendall tau")
+            ("shuffle-before-tau",                    "Shuffle before calculating tau (useful for analysis only)")
             ;
 
         po::options_description all_options{ "All options" };
@@ -217,6 +218,7 @@ auto main(int argc, char * argv[]) -> int
             params.prime = options_vars["prime"].as<int>();
 
         params.measure_kendall_tau = options_vars.count("tau");
+        params.shuffle_before_tau = options_vars.count("shuffle-before-tau");
 
         /* Create graphs */
         auto graph = read_dimacs(options_vars["file"].as<std::string>());
