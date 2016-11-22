@@ -5,6 +5,7 @@
 #include "template_voodoo.hh"
 
 #include <algorithm>
+#include <numeric>
 #include <limits>
 #include <iostream>
 #include <atomic>
