@@ -10,6 +10,11 @@
 #include <iostream>
 #include <atomic>
 #include <mutex>
+#include <chrono>
+
+using std::chrono::steady_clock;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
 
 namespace
 {
@@ -20,6 +25,8 @@ namespace
         std::mutex mutex;
         std::vector<unsigned> c;
 
+        std::chrono::time_point<std::chrono::steady_clock> start_time;
+
         void update(const std::vector<unsigned> & new_c)
         {
             while (true) {
@@ -29,7 +36,7 @@ namespace
                     if (value.compare_exchange_strong(current_value, new_c_size)) {
                         std::unique_lock<std::mutex> lock(mutex);
                         c = new_c;
-                        std::cout << "-- " << new_c.size() << std::endl;
+                        std::cout << "-- " << duration_cast<milliseconds>(steady_clock::now() - start_time).count() << " " << new_c.size() << std::endl;
                         break;
                     }
                 }
@@ -56,6 +63,8 @@ namespace
             invorder(g.size),
             nodes(0)
         {
+            incumbent.start_time = params.start_time;
+
             // populate our order with every vertex initially
             std::iota(order.begin(), order.end(), 0);
 
