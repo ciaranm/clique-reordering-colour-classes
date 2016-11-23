@@ -20,12 +20,19 @@ namespace
 {
     struct Incumbent
     {
+        const std::chrono::time_point<std::chrono::steady_clock> & start_time;
+        const std::atomic<unsigned long long> & nodes;
+
         std::atomic<unsigned> value{ 0 };
 
         std::mutex mutex;
         std::vector<unsigned> c;
 
-        std::chrono::time_point<std::chrono::steady_clock> start_time;
+        Incumbent(const auto & s, const auto & n) :
+            start_time(s),
+            nodes(n)
+        {
+        }
 
         void update(const std::vector<unsigned> & new_c)
         {
@@ -36,7 +43,10 @@ namespace
                     if (value.compare_exchange_strong(current_value, new_c_size)) {
                         std::unique_lock<std::mutex> lock(mutex);
                         c = new_c;
-                        std::cout << "-- " << duration_cast<milliseconds>(steady_clock::now() - start_time).count() << " " << new_c.size() << std::endl;
+                        std::cout << "-- " << new_c.size()
+                            << " " << nodes
+                            << " " << duration_cast<milliseconds>(steady_clock::now() - start_time).count()
+                            << std::endl;
                         break;
                     }
                 }
@@ -61,10 +71,9 @@ namespace
             params(q),
             order(g.size),
             invorder(g.size),
+            incumbent(params.start_time, nodes),
             nodes(0)
         {
-            incumbent.start_time = params.start_time;
-
             // populate our order with every vertex initially
             std::iota(order.begin(), order.end(), 0);
 
