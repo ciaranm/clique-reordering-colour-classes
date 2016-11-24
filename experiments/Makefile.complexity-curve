@@ -1,0 +1,19 @@
+SHELL := /bin/bash
+VARIANTS := default
+RESULTS := complexity-results
+SIZES := 200
+DENSITIES := $(shell seq -w 000 999 | xargs -n1 echo 0. | tr -d ' ' )
+N_REPEATS := 999
+REPEATS := $(shell seq -w 000 $(N_REPEATS) )
+TIMEOUT := 0
+
+all : $(foreach s,$(SIZES),$(foreach d,$(DENSITIES),$(foreach v,$(VARIANTS),$(foreach i,$(REPEATS),$(RESULTS)/$(s)-$(d)-$(i)-$(v).out))))
+
+define INSTANCE_template
+$(RESULTS)/$(1)-$(2)-%-default.out :
+	mkdir -p $(RESULTS)
+	../code/solve_max_clique <(../code/create_random_graph $(1) $(2) $$* ) | tee $$@
+endef
+
+$(foreach s,$(SIZES),$(foreach d,$(DENSITIES),$(eval $(call INSTANCE_template,$(s),$(d)))))
+
