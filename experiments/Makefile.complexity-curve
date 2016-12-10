@@ -1,18 +1,25 @@
 SHELL := /bin/bash
-VARIANTS := default
+VARIANTS := default 2df
 RESULTS := complexity-results
-SIZES := 200
-DENSITIES := $(shell seq -w 000 999 | xargs -n1 echo 0. | tr -d ' ' )
-N_REPEATS := 999
-REPEATS := $(shell seq -w 000 $(N_REPEATS) )
+SIZES := 150
+D_START := 6000
+D_END := 9900
+DENSITIES := $(shell seq -w $(D_START) $(D_END) | xargs -n1 echo 0. | tr -d ' ' )
+S_REPEATS := 0000
+N_REPEATS := 0999
+REPEATS := $(shell seq -w $(S_REPEATS) $(N_REPEATS) )
 TIMEOUT := 0
 
-all : $(foreach s,$(SIZES),$(foreach d,$(DENSITIES),$(foreach v,$(VARIANTS),$(foreach i,$(REPEATS),$(RESULTS)/$(s)-$(d)-$(i)-$(v).out))))
+all : $(foreach s,$(SIZES),$(foreach d,$(DENSITIES),$(foreach v,$(VARIANTS),$(foreach i,$(REPEATS),$(RESULTS)/$(s)/$(d)/$(s)-$(d)-$(i)-$(v).out))))
 
 define INSTANCE_template
-$(RESULTS)/$(1)-$(2)-%-default.out :
-	mkdir -p $(RESULTS)
+$(RESULTS)/$(1)/$(2)/$(1)-$(2)-%-default.out :
+	mkdir -p $(RESULTS)/$(1)/$(2)
 	../code/solve_max_clique <(../code/create_random_graph $(1) $(2) $$* ) | tee $$@
+
+$(RESULTS)/$(1)/$(2)/$(1)-$(2)-%-2df.out :
+	mkdir -p $(RESULTS)/$(1)/$(2)
+	../code/solve_max_clique --2df <(../code/create_random_graph $(1) $(2) $$* ) | tee $$@
 endef
 
 $(foreach s,$(SIZES),$(foreach d,$(DENSITIES),$(eval $(call INSTANCE_template,$(s),$(d)))))
