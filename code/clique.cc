@@ -298,7 +298,7 @@ namespace
             // for each v in p... (v comes later)
             for (int n = p.popcount() - 1 ; n >= 0 ; --n) {
                 // bound, timeout or early exit?
-                if (c.size() + p_bounds[n] <= incumbent.value || params.abort->load())
+                if (c.size() + p_bounds[n] <= incumbent.value || (params.decide > 0 && incumbent.value >= params.decide) || params.abort->load())
                     return;
 
                 auto v = p_order[n];

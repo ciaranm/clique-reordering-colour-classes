@@ -171,6 +171,7 @@ auto main(int argc, char * argv[]) -> int
             ("prime",              po::value<int>(),  "Set initial incumbent size")
             ("tau",                                   "Measure Kendall tau")
             ("shuffle-before-tau",                    "Shuffle before calculating tau (useful for analysis only)")
+            ("decide",             po::value<int>(),  "Solve the decision problem with this value of omega")
             ;
 
         po::options_description all_options{ "All options" };
@@ -217,6 +218,12 @@ auto main(int argc, char * argv[]) -> int
         if (options_vars.count("prime"))
             params.prime = options_vars["prime"].as<int>();
 
+        if (options_vars.count("decide")) {
+            params.decide = options_vars["decide"].as<int>();
+            if (! options_vars.count("prime"))
+                params.prime = params.decide - 1;
+        }
+
         params.measure_kendall_tau = options_vars.count("tau");
         params.shuffle_before_tau = options_vars.count("shuffle-before-tau");
 
@@ -243,8 +250,11 @@ auto main(int argc, char * argv[]) -> int
             std::cout << " aborted";
         std::cout << std::endl;
 
-        for (auto v : result.clique)
-            std::cout << v << " ";
+        if (0 != params.decide && result.clique.empty())
+            std::cout << "false";
+        else
+            for (auto v : result.clique)
+                std::cout << v << " ";
         std::cout << std::endl;
 
         std::cout << overall_time.count();
