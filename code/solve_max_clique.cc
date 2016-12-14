@@ -168,6 +168,7 @@ auto main(int argc, char * argv[]) -> int
             ("timeout",            po::value<int>(),  "Abort after this many seconds")
             ("sdf",                                   "Smallest domain first (slow)")
             ("2df",                                   "Domains of size 2 first")
+            ("iterate-backwards",                     "Iterate backwards")
             ("prime",              po::value<int>(),  "Set initial incumbent size")
             ("tau",                                   "Measure Kendall tau")
             ("shuffle-before-tau",                    "Shuffle before calculating tau (useful for analysis only)")
@@ -214,6 +215,9 @@ auto main(int argc, char * argv[]) -> int
             params.how_much_sorting = Params::full_sort;
         else if (options_vars.count("2df"))
             params.how_much_sorting = Params::defer1;
+
+        if (options_vars.count("iterate-backwards"))
+            params.iterate_backwards = true;
 
         if (options_vars.count("prime"))
             params.prime = options_vars["prime"].as<int>();

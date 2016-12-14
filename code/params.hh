@@ -17,6 +17,9 @@ struct Params
     /// How much sorting to do?
     enum { no_sorting, defer1, full_sort } how_much_sorting = no_sorting;
 
+    /// Iterate backwards?
+    bool iterate_backwards = false;
+
     /// Prime the incumbent?
     unsigned prime = 0;
 

@@ -257,6 +257,16 @@ namespace
                     break;
             }
 
+            if (params.iterate_backwards) {
+                auto n_colours = p_bounds[p.popcount() - 1];
+
+                std::reverse(p_order.begin(), p_order.begin() + p.popcount());
+                std::reverse(p_bounds.begin(), p_bounds.begin() + p.popcount());
+
+                for (unsigned i = 0 ; i < p.popcount() ; ++i)
+                    p_bounds[i] = n_colours - p_bounds[i] + 1;
+            }
+
             if (params.measure_kendall_tau) {
                 std::vector<unsigned> sizes;
                 unsigned count = 0;
